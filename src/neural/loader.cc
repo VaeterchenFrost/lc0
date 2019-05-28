@@ -160,16 +160,18 @@ WeightsFile LoadWeightsFromFile(const std::string& filename) {
 
 std::string DiscoverWeightsFile() {
   const int kMinFileSize = 500000;  // 500 KB
+  const int kMaxFileSize = 2000000000; // 2 GB
 
   const std::string root_path = CommandLine::BinaryDirectory();
 
-  // Open all files in <binary dir> amd <binary dir>/networks,
-  // ones which are >= kMinFileSize are candidates.
+  // Open all files in <binary dir> and <binary dir>/networks,
+  // ones which are >= kMinFileSize  and <= kMaxFileSize are candidates.
   std::vector<std::pair<time_t, std::string> > time_and_filename;
   for (const auto& path : {"", "/networks"}) {
     for (const auto& file : GetFileList(root_path + path)) {
       const std::string filename = root_path + path + "/" + file;
       if (GetFileSize(filename) < kMinFileSize) continue;
+      if (GetFileSize(filename) > kMaxFileSize) continue;
       time_and_filename.emplace_back(GetFileTime(filename), filename);
     }
   }
